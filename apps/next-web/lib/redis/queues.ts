@@ -1,24 +1,11 @@
-import {
-  Queue,
-  QueueOptions,
-  WorkerOptions,
-  Worker,
-  QueueEvents,
-} from "bullmq";
+import { QueueOptions } from "bull";
 import { Redis } from "ioredis";
 import { REDIS_CONNECTION_URL } from "./config";
 import { processUserPaymentQueue, processAdminEscrowQueue } from "./process";
-
-const REDIS_CONNECTION = new Redis({
-  ...REDIS_CONNECTION_URL,
-  maxRetriesPerRequest: null,
-  tls: {},
-  connectTimeout: 10000,
-  retryStrategy: (times) => Math.min(times * 50, 2000),
-});
+import Queue from "bull";
 
 const queueOptions: QueueOptions = {
-  connection: REDIS_CONNECTION,
+  redis: REDIS_CONNECTION_URL,
   defaultJobOptions: {
     attempts: 2,
     backoff: {
@@ -28,60 +15,30 @@ const queueOptions: QueueOptions = {
   },
 };
 
-const workerOptions: WorkerOptions = {
-  connection: REDIS_CONNECTION,
-  stalledInterval: 30000,
-};
-
 export const userPayoutQueue = new Queue("user-payout-queue", queueOptions);
 export const adminEscrowQueue = new Queue("admin-escrow-queue", queueOptions);
 
-export const userPayoutWorker = new Worker(
-  "user-payout-queue",
-  processUserPaymentQueue,
-  workerOptions
-);
-export const adminEscrowWorker = new Worker(
-  "admin-escrow-queue",
-  processAdminEscrowQueue,
-  workerOptions
-);
+// Register job processors
+userPayoutQueue.process(processUserPaymentQueue);
+adminEscrowQueue.process(processAdminEscrowQueue);
 
-// Queue event to monitor the status of the queue
-const escrowQueueEvents = new QueueEvents("admin-escrow-queue", {
-  connection: REDIS_CONNECTION,
+// Optional: Listening to job events for logging
+userPayoutQueue.on("waiting", (jobId: any) => {
+  console.log("Waiting user payout", jobId);
+});
+userPayoutQueue.on("completed", (job: { id: any; }) => {
+  console.log("Completed user payout", job.id);
+});
+userPayoutQueue.on("failed", (job: { id: any; }, error: any) => {
+  console.error("Error in user payout", job.id, error);
 });
 
-escrowQueueEvents.on("waiting", ({ jobId }) => {
-  console.log("Waiting escrow", jobId);
+adminEscrowQueue.on("waiting", (jobId: any) => {
+  console.log("Waiting admin escrow", jobId);
 });
-
-escrowQueueEvents.on("completed", ({ jobId }) => {
-  console.log("Completed escrow", jobId);
+adminEscrowQueue.on("completed", (job: { id: any; }) => {
+  console.log("Completed admin escrow", job.id);
 });
-
-escrowQueueEvents.on(
-  "failed",
-  ({ jobId, failedReason }: { jobId: string; failedReason: string }) => {
-    console.error("Error in escrow", jobId, failedReason);
-  }
-);
-
-const payoutQueueEvents = new QueueEvents("user-payout-queue", {
-  connection: REDIS_CONNECTION,
+adminEscrowQueue.on("failed", (job: { id: any; }, error: any) => {
+  console.error("Error in admin escrow", job.id, error);
 });
-
-payoutQueueEvents.on("waiting", ({ jobId }) => {
-  console.log("Waiting payout", jobId);
-});
-
-payoutQueueEvents.on("completed", ({ jobId }) => {
-  console.log("Completed payout", jobId);
-});
-
-payoutQueueEvents.on(
-  "failed",
-  ({ jobId, failedReason }: { jobId: string; failedReason: string }) => {
-    console.error("Error in payout", jobId, failedReason);
-  }
-);
