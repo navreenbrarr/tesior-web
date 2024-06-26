@@ -83,7 +83,7 @@ export async function POST() {
       }
     );
 
-    await userPayoutQueue.add("process-queue", { userId });
+    // await userPayoutQueue.add("process-queue", { userId });
 
     return NextResponse.json(
       { message: "Pending amount locked. Payout will be processed shortly" },
