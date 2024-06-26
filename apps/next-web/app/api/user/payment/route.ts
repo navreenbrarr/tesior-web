@@ -83,7 +83,6 @@ export async function POST() {
       }
     );
 
-    await userPayoutQueue.waitUntilReady();
     await userPayoutQueue.add("process-queue", { userId });
 
     return NextResponse.json(

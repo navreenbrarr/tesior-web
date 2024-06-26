@@ -50,7 +50,6 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await adminEscrowQueue.waitUntilReady();
     await adminEscrowQueue.add("process-queue", {
       adminId,
       amount,
