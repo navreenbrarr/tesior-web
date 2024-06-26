@@ -50,11 +50,21 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await adminEscrowQueue.add("process-queue", {
-      adminId,
-      amount,
-      signature,
-    });
+    try {
+      await adminEscrowQueue.add("process-queue", {
+        adminId,
+        amount,
+        signature,
+      });
+    } catch (error) {
+      console.error("Failed to add to queue", error);
+      return NextResponse.json(
+        {
+          error: "An error occurred while creating escrow: " + error,
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       { message: "Escrow creation initiated. It will be processed shortly" },

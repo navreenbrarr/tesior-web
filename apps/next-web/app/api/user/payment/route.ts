@@ -83,7 +83,17 @@ export async function POST() {
       }
     );
 
-    await userPayoutQueue.add("process-queue", { userId });
+    try {
+      await userPayoutQueue.add("process-queue", { userId });
+    } catch (error) {
+      console.error("Failed to add to queue", error);
+      return NextResponse.json(
+        {
+          error: "An error occurred while creating escrow: " + error,
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       { message: "Pending amount locked. Payout will be processed shortly" },
