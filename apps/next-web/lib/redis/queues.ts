@@ -4,7 +4,7 @@ import {
   WorkerOptions,
   Worker,
   QueueEvents,
-} from "bullmq";
+} from "bull";
 import { Redis } from "ioredis";
 import { REDIS_CONNECTION_URL } from "./config";
 import { processUserPaymentQueue, processAdminEscrowQueue } from "./process";
