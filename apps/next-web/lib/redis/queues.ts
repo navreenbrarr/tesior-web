@@ -4,17 +4,17 @@ import Queue from "bull";
 export const userPayoutQueue = new Queue("user-payout-queue", {
   redis: {
     port: 6379,
-    host: "https://relative-poodle-38122.upstash.io",
+    host: "relative-poodle-38122.upstash.io",
     password: "AZTqAAIncDE2Njc2NTFmYTQxYTI0ZjQwOWFhYTM0MGIyYzQyNDNlY3AxMzgxMjI",
-    tls: {},
+    tls: { rejectUnauthorized: false } // If your service uses self-signed certificates
   },
 });
 export const adminEscrowQueue = new Queue("admin-escrow-queue", {
   redis: {
     port: 6379,
-    host: "https://relative-poodle-38122.upstash.io",
+    host: "relative-poodle-38122.upstash.io",
     password: "AZTqAAIncDE2Njc2NTFmYTQxYTI0ZjQwOWFhYTM0MGIyYzQyNDNlY3AxMzgxMjI",
-    tls: {},
+    tls: { rejectUnauthorized: false } // If your service uses self-signed certificates
   },
 });
 
