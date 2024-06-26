@@ -50,11 +50,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // await adminEscrowQueue.add("process-queue", {
-    //   adminId,
-    //   amount,
-    //   signature,
-    // });
+    await adminEscrowQueue.waitUntilReady();
+    await adminEscrowQueue.add("process-queue", {
+      adminId,
+      amount,
+      signature,
+    });
 
     return NextResponse.json(
       { message: "Escrow creation initiated. It will be processed shortly" },
