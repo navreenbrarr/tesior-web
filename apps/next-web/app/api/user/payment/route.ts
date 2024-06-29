@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { userPayoutQueue } from "@/lib/redis/queues";
 import { getSession } from "@/lib/auth/session";
 import { lamportsToSol } from "@/lib/utils/solana";
+import { Redis } from "@/lib/payments-worker/redis";
 
 // Get all user payments
 export async function GET() {
@@ -84,7 +84,11 @@ export async function POST() {
     );
 
     try {
-      await userPayoutQueue.add("process-queue", { userId });
+      await Redis.getInstance().send("user_payment", {
+        data: {
+          userId,
+        },
+      });
     } catch (error) {
       console.error("Failed to add to queue", error);
       return NextResponse.json(
