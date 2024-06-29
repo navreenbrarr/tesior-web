@@ -49,7 +49,7 @@ export default function Wallet() {
         signature,
       });
 
-      const response = await fetch(`${APP_DOMAIN}/api/admin/escrow`, {
+      const response = await fetch(`/api/admin/escrow`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: amount, signature }),

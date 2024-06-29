@@ -30,7 +30,7 @@ export function DataTableRowActions<TData>({
 
   const handleStatus = async (taskId: string, status: string) => {
     try {
-      const response = await fetch(`${APP_DOMAIN}/api/admin/task/${taskId}`, {
+      const response = await fetch(`/api/admin/task/${taskId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -39,7 +39,7 @@ export function DataTableRowActions<TData>({
       const data = await response.json();
 
       if (data.approval) {
-        mutate(`${APP_DOMAIN}/api/user/task`);
+        mutate(`/api/user/task`);
         toast.success("Task status updated successfully!");
       } else {
         toast.error("Failed to update task status");
